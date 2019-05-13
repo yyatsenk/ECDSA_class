@@ -6,92 +6,7 @@
 
 // `BigIntegerLibrary.hh' includes all of the library headers.
 #include "BigIntegerLibrary.hh"
-
-struct ellipse_curve
-{
-	BigInteger a;
-	BigInteger b;
-	BigUnsigned m;
-};
-struct ellipse_curve_point
-{
-	BigInteger x;
-	BigInteger y;
-	bool is_infinitive;
-	ellipse_curve_point()
-	{}
-	ellipse_curve_point(BigInteger &&x_val, BigInteger &&y_val):x(x_val),y(y_val)
-	{}
-	bool operator==(const ellipse_curve_point &point)
-	{
-		if (x == point.x && y == point.y)
-			return 1;
-		return 0;
-	}
-};
-
-class ellipse_curve_class
-{
-	ellipse_curve curve;
-	public:
-	ellipse_curve_class()
-	{}
-	ellipse_curve_class(BigInteger &&a, BigInteger &&b, BigUnsigned &&m)
-	{
-		curve.a = a;
-		curve.b = b;
-		curve.m = m;
-	}
-	ellipse_curve_class(const ellipse_curve_class &arg)
-	{
-		curve.a = arg.curve.a;
-		curve.b = arg.curve.b;
-		curve.m = arg.curve.m;
-	}
-	~ellipse_curve_class(){}
-	BigInteger phi(BigInteger n) {
-	BigInteger ret(1);
-	for(BigInteger i(2); i * i <= n; i++) {
-		BigInteger p(1);
-		while(n % i == BigInteger(0)) {
-			p = p * i;
-			n = n / i;
-		}
-		p = p / i;
-		if(!p.isZero() && p >= BigInteger(1))
-		{
-			ret = ret * p * (i - BigInteger(1));
-			p = p / i;
-		}
-	}
-	n = n - 1;
-	if (n != BigInteger(0))
-		return n * ret;
-	return ret;
-}
-	ellipse_curve_point curve_point_add(ellipse_curve_point &P, ellipse_curve_point &Q)
-	{
-		ellipse_curve_point res;
-		BigInteger lambda;
-		
-		if ((Q.x - P.x) > (Q.y - P.y))
-			lambda = ((Q.y - P.y) * (Q.x - P.x).toPow(phi(curve.m) - 1)) % curve.m;
-		else if (P == Q)
-		{
-			if ((BigInteger(3) * P.x.toPow(2) + curve.a) < BigInteger(2) * P.y)
-				lambda = ((BigInteger(3) * P.x.toPow(2) + curve.a) * (BigInteger(2) * P.y).toPow(phi(curve.m) - 1))%curve.m;
-			else
-				lambda = ((BigInteger(3) * P.x.toPow(2) + curve.a) / (BigInteger(2) * P.y))%curve.m;
-		}
-		else
-			lambda = (Q.y - P.y) / (Q.x - P.x) % curve.m;
-		res.x = (lambda.toPow(2) -P.x -Q.x)%curve.m;
-		res.y = (lambda * (P.x - res.x) - P.y) %curve.m;
-		
-		return (res);
-	}	
-
-};
+#include "EllipseCurveClass.hpp"
 
 
 int main() {
@@ -100,20 +15,16 @@ int main() {
 	 * one.  Your C++ compiler might need a command-line option to compile
 	 * code that uses exceptions. */
 	try {
-		ellipse_curve_class curve(BigInteger(2), BigInteger(3), BigUnsigned(stringToBigUnsigned(std::string("3141592"))));
-		ellipse_curve_point P(BigInteger(stringToBigInteger(std::string("314159265358973279"))), BigInteger(stringToBigInteger(std::string("3145358979113238462643383279"))));
+		ellipse_curve_class curve(BigInteger(2), BigInteger(3), BigUnsigned(stringToBigUnsigned(std::string("311"))));
+		ellipse_curve_point P(BigInteger(21), BigInteger(200));
 		ellipse_curve_point Q(BigInteger(95), BigInteger(31));
 		ellipse_curve_point res;
+		BigInteger multer(37);
 		
-		res = curve.curve_point_add(P, Q);
-		std::cout<< res.x << "\n" << res.y << std::endl;
-		BigUnsigned m(13);
-		BigInteger dx;
-		BigInteger dy;
-		BigInteger l;
-		BigInteger res_x;
-		BigInteger res_y;
-		BigInteger test(123422232);
+		//res = curve.curve_point_add(P, Q);
+		//std::cout<< res.x << "\n" << res.y << std::endl;
+		res = curve.curve_point_mul(P, multer);
+		
 		
 		/*dx = (q_x - p_x);
 		dy = (q_y - p_y);

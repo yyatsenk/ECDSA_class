@@ -3,7 +3,7 @@ all:
 
 # Implicit rule to compile C++ files.  Modify to your taste.
 %.o: %.cc
-	g++ -c -O2 -Wall -Wextra -pedantic $<
+	g++ -c -g -O2 -Wall -Wextra -pedantic $<
 
 # Components of the library.
 library-objects = \
@@ -58,7 +58,7 @@ $(program-objects) : $(library-headers)
 
 # How to link the program.  The implicit rule covers individual objects.
 $(program) : $(program-objects) $(library-objects)
-	g++ -std=c++11 $^ -o $@
+	g++ -std=c++11 -g $^ -o $@
 
 # Delete all generated files we know about.
 clean :
