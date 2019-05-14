@@ -15,16 +15,16 @@ int main() {
 	 * one.  Your C++ compiler might need a command-line option to compile
 	 * code that uses exceptions. */
 	try {
-		ellipse_curve_class curve(BigInteger(2), BigInteger(3), BigUnsigned(stringToBigUnsigned(std::string("311"))));
-		ellipse_curve_point P(BigInteger(91343332335), BigInteger(200));
-		ellipse_curve_point Q(BigInteger(95), BigInteger(31));
-		BigInteger res;
-		BigInteger multer(823435);
+		ellipse_curve_class curve(BigInteger(1), BigInteger(1), BigUnsigned(stringToBigUnsigned(std::string("9998"))));
+		ellipse_curve_point P(BigInteger(9), BigInteger(845));
+		ellipse_curve_point Q(BigInteger(43), BigInteger(75));
+		ellipse_curve_point res;
+		BigInteger multer(82345);
 		
-		//res = curve.curve_point_add(P, Q);
-		//std::cout<< res.x << "\n" << res.y << std::endl;
-		res = curve.kar_mul(P.x, multer);
-		std::cout<< res << "\n" ;
+		res = curve.curve_point_add(P, Q);
+		std::cout<< res.x << "\n" << res.y << std::endl;
+		//res = curve.kar_mul(P.x, multer);
+		//std::cout<< res << "\n" ;
 		
 	}
 	catch(...)

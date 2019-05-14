@@ -72,18 +72,18 @@ class ellipse_curve_class
 		BigInteger lambda;
 		
 		if ((Q.x - P.x) > (Q.y - P.y))
-			lambda = ((Q.y - P.y) * (Q.x - P.x).toPow(phi(curve.m) - 1)) % curve.m;
+			lambda = (kar_mul((Q.y - P.y) ,(Q.x - P.x).toPow(phi(curve.m) - 1))) % curve.m;
 		else if (P == Q)
 		{
-			if ((BigInteger(3) * P.x.toPow(2) + curve.a) < BigInteger(2) * P.y)
-				lambda = ((BigInteger(3) * P.x.toPow(2) + curve.a) * (BigInteger(2) * P.y).toPow(phi(curve.m) - 1))%curve.m;
+			if ((kar_mul(BigInteger(3) , P.x.toPow(2)) + curve.a) < BigInteger(2) * P.y)
+				lambda = (kar_mul((kar_mul(BigInteger(3) , P.x.toPow(2)) + curve.a), (BigInteger(2) * P.y).toPow(phi(curve.m) - 1)))%curve.m;
 			else
-				lambda = ((BigInteger(3) * P.x.toPow(2) + curve.a) / (BigInteger(2) * P.y))%curve.m;
+				lambda = ((kar_mul(BigInteger(3) , P.x.toPow(2)) + curve.a) / (BigInteger(2) * P.y))%curve.m;
 		}
 		else
 			lambda = (Q.y - P.y) / (Q.x - P.x) % curve.m;
 		res.x = (lambda.toPow(2) -P.x -Q.x)%curve.m;
-		res.y = (lambda * (P.x - res.x) - P.y) %curve.m;
+		res.y = (kar_mul(std::move(lambda) ,(P.x - res.x)) - P.y) %curve.m;
 		
 		return (res);
 	}
@@ -138,6 +138,10 @@ class ellipse_curve_class
         //std::cout << div << std::endl;
         std::cout <<"res = " << (res / BigInteger(div)) << std::endl;
         return res / BigInteger(div);
+    }
+    BigInteger kar_mul(BigInteger &&P, BigInteger &&n)
+    {
+    	return kar_mul(P, n);
     }
 
 };
