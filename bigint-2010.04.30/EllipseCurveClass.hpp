@@ -2,6 +2,7 @@
 #define ELLIPSECURVECLASS_HPP
 
 #include "BigIntegerLibrary.hh"
+#include <math.h>
 
 struct ellipse_curve
 {
@@ -96,24 +97,47 @@ class ellipse_curve_class
     Prod1 = Karatsuba_mul(X_l, Y_l)
     Prod2 = Karatsuba_mul(X_r, Y_r)
     Prod3 = Karatsuba_mul(X_l + X_r, Y_l + Y_r)
-    вернуть Prod1 * 10 ^ n + (Prod3 - Prod1 - Prod2) * 10 ^ (n / 2) + Prod2*/
-    ellipse_curve_point curve_point_mul(ellipse_curve_point &P, BigInteger &n)
+    вернуть Prod1 * 10 ^ n + (Prod3 - Prod1 - Prod2) * 10 ^ (n / 2) + Prod2 */
+    BigInteger kar_mul(BigInteger &P, BigInteger &n)
 	{
-        ellipse_curve_point tmp;
-        unsigned int len = n.getLength() +1;
-        std::cout <<"Test " << len << std::endl;
-        BigInteger X_l = P.x / BigInteger((10 *(len - 1)));
-        BigInteger X_r = P.x % BigInteger((10 *(len - 1)));
-        BigInteger Y_l = n / BigInteger((10 *(len - 1)));
-        BigInteger Y_r = n % BigInteger((10 *(len - 1)));
+        BigInteger res;
+        int div = 1;
+        unsigned int len = (bigIntegerToString(n)).length() > (bigIntegerToString(P)).length() ? (bigIntegerToString(n)).length() : (bigIntegerToString(P)).length();
+        if (len == 1)
+        {
+        	res = P * n;
+        	return (res);
+        }
+        if ((bigIntegerToString(n)).length()%2)
+        {
+        	n *= BigInteger(10);
+        	if (len % 2)
+        		len++;
+        	div *= 10;
+        }
+        if ((bigIntegerToString(P)).length()%2)
+        {
+        	P *= BigInteger(10);
+        	if (len % 2)
+        		len++;
+        	div *= 10;
+        }
+        BigInteger divider(BigInteger(10).toPow(len/2));
+        BigInteger X_l = P / divider;
+        BigInteger X_r = P % divider;
+        BigInteger Y_l = n / divider;
+        BigInteger Y_r = n % divider;
+        //std::cout <<"X_l = " << X_l << " X_r = "  << X_r << " Y_l = " << Y_l << " Y_r = " << Y_r<< std::endl;
         BigInteger r1 = X_l * Y_l;
         BigInteger r2 = X_r * Y_r;
-        BigInteger r3 = (X_l + X_r) * (Y_l + Y_r);
-        BigInteger res;
-        std::cout <<"r1 = " << r1 << " r2 = "  << r2 << " r3 = " << r3 << " Y_r = " << Y_r<< std::endl;
+        BigInteger ar1(X_l + X_r);
+        BigInteger ar2(Y_l + Y_r);
+        BigInteger r3 = ar1 * ar2;
+        //std::cout <<"r1 = " << r1 << " r2 = "  << r2 << " r3 = " << r3 << std::endl;
         res = r1 * BigInteger(10).toPow(len) + (r3 - r1 - r2) * BigInteger(10).toPow(len / 2) + r2;
-        std::cout <<"res = " << res << std::endl;
-        return tmp;
+        //std::cout << div << std::endl;
+        std::cout <<"res = " << (res / BigInteger(div)) << std::endl;
+        return res / BigInteger(div);
     }
 
 };

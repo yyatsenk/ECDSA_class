@@ -16,27 +16,16 @@ int main() {
 	 * code that uses exceptions. */
 	try {
 		ellipse_curve_class curve(BigInteger(2), BigInteger(3), BigUnsigned(stringToBigUnsigned(std::string("311"))));
-		ellipse_curve_point P(BigInteger(21), BigInteger(200));
+		ellipse_curve_point P(BigInteger(91343332335), BigInteger(200));
 		ellipse_curve_point Q(BigInteger(95), BigInteger(31));
-		ellipse_curve_point res;
-		BigInteger multer(37);
+		BigInteger res;
+		BigInteger multer(823435);
 		
 		//res = curve.curve_point_add(P, Q);
 		//std::cout<< res.x << "\n" << res.y << std::endl;
-		res = curve.curve_point_mul(P, multer);
+		res = curve.kar_mul(P.x, multer);
+		std::cout<< res << "\n" ;
 		
-		
-		/*dx = (q_x - p_x);
-		dy = (q_y - p_y);
-		//if (dx > dy)
-		//	l = ((q_y - p_y) * p_x.toPow((q_x - p_x), (phi(m) - 1)))%m;
-		//else
-		//	l = (q_y - p_y)/(q_x - p_x)%m;
-		//res_x = (l.toPow(l, 2) - p_x - q_x)%m;
-		res_y = (l*(p_x - res_x)-p_y)%m;
-		//std::cout << res_x << "\n" << res_y << std::endl;//phi((q_y - p_y));
-		//std::cout << (test * test *test *test*test*test)/(test * test *test *test*test*test);
-		*/
 	}
 	catch(...)
 	{}
