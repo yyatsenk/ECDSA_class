@@ -3,6 +3,10 @@
 
 #include "BigIntegerLibrary.hh"
 #include <math.h>
+#include <vector>
+#include <map>
+#include <iterator>
+
 
 struct ellipse_curve
 {
@@ -91,6 +95,43 @@ class ellipse_curve_class
 		
 		return (res);
 	}
+	ellipse_curve_point curve_point_mul(ellipse_curve_point &P, unsigned int n)
+	{
+		ellipse_curve_point res;
+		std::vector<int> step;
+		std::map<int, ellipse_curve_point> points;
+		int i = 0;
+		int size = 0;
+		int start = 0;
+		while (n != 0)
+		{
+			if (n % 2 == 1)
+			{
+				size++;
+				step.push_back(i);
+			}
+			n = n / 2;
+			i++;
+			n--;
+		}
+		for (auto _v: step)
+			std::cout << _v << std::endl;
+		while (start < size)
+		{
+			auto point = points.find(step[start]);
+			if (point == points.end())
+			{	
+				res = curve_point_add(P, P);
+				points.insert(std::make_pair(start, res));
+			}
+			//else
+			//{
+
+			//}
+			start++;
+		}
+		return (res);
+	}
 	ellipse_curve_point curve_point_mul(ellipse_curve_point &P, BigInteger n)
 	{
 		ellipse_curve_point res;
@@ -163,11 +204,11 @@ class ellipse_curve_class
         BigInteger Y_l = n / divider;
         BigInteger Y_r = n % divider;
         //std::cout <<"X_l = " << X_l << " X_r = "  << X_r << " Y_l = " << Y_l << " Y_r = " << Y_r<< std::endl;
-        BigInteger r1 = X_l * Y_l;
-        BigInteger r2 = X_r * Y_r;
+        BigInteger r1 = kar_mul(X_l , Y_l);
+        BigInteger r2 = kar_mul(X_r , Y_r);
         BigInteger ar1(X_l + X_r);
         BigInteger ar2(Y_l + Y_r);
-        BigInteger r3 = ar1 * ar2;
+        BigInteger r3 = kar_mul(ar1 , ar2);
         //std::cout <<"r1 = " << r1 << " r2 = "  << r2 << " r3 = " << r3 << std::endl;
         res = r1 * BigInteger(10).toPow(len) + (r3 - r1 - r2) * BigInteger(10).toPow(len / 2) + r2;
         //std::cout << div << std::endl;
