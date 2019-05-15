@@ -104,12 +104,18 @@ class ellipse_curve_class
         int div = 1;
         int sign = 1;
         unsigned int len = (bigIntegerToString(n)).length() > (bigIntegerToString(P)).length() ? (bigIntegerToString(n)).length() : (bigIntegerToString(P)).length();
-        if ((P.getSign() == -1 || n.getSign() == -1) && (P.getSign() != n.getSign()))
+        if (P.getSign() == -1 || n.getSign() == -1)
         {
         	sign = -1;
-        	if (P.getSign() == -1)
+        	if (P.getSign() == -1 && n.getSign() == -1)
+        	{
         		P = -P;
-        	if (n.getSign() == -1)
+        		n = -n;
+        		sign = 1;
+        	}
+        	else if (P.getSign() == -1)
+        		P = -P;
+        	else if (n.getSign() == -1)
         		n = -n;
         }
         if (len == 1)
