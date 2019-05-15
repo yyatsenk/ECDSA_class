@@ -98,11 +98,20 @@ class ellipse_curve_class
     Prod2 = Karatsuba_mul(X_r, Y_r)
     Prod3 = Karatsuba_mul(X_l + X_r, Y_l + Y_r)
     вернуть Prod1 * 10 ^ n + (Prod3 - Prod1 - Prod2) * 10 ^ (n / 2) + Prod2 */
-    BigInteger kar_mul(BigInteger &P, BigInteger &n)
+    BigInteger kar_mul(BigInteger P, BigInteger n)
 	{
         BigInteger res;
         int div = 1;
+        int sign = 1;
         unsigned int len = (bigIntegerToString(n)).length() > (bigIntegerToString(P)).length() ? (bigIntegerToString(n)).length() : (bigIntegerToString(P)).length();
+        if ((P.getSign() == -1 || n.getSign() == -1) && (P.getSign() != n.getSign()))
+        {
+        	sign = -1;
+        	if (P.getSign() == -1)
+        		P = -P;
+        	if (n.getSign() == -1)
+        		n = -n;
+        }
         if (len == 1)
         {
         	res = P * n;
@@ -127,21 +136,17 @@ class ellipse_curve_class
         BigInteger X_r = P % divider;
         BigInteger Y_l = n / divider;
         BigInteger Y_r = n % divider;
-        //std::cout <<"X_l = " << X_l << " X_r = "  << X_r << " Y_l = " << Y_l << " Y_r = " << Y_r<< std::endl;
-        BigInteger r1 = X_l * Y_l;
-        BigInteger r2 = X_r * Y_r;
+        std::cout <<"X_l = " << X_l << " X_r = "  << X_r << " Y_l = " << Y_l << " Y_r = " << Y_r<< std::endl;
+        BigInteger r1 = kar_mul(X_l , Y_l);
+        BigInteger r2 = kar_mul(X_r , Y_r);
         BigInteger ar1(X_l + X_r);
         BigInteger ar2(Y_l + Y_r);
-        BigInteger r3 = ar1 * ar2;
-        //std::cout <<"r1 = " << r1 << " r2 = "  << r2 << " r3 = " << r3 << std::endl;
+        BigInteger r3 = kar_mul(ar1 , ar2);
+        std::cout <<"r1 = " << r1 << " r2 = "  << r2 << " r3 = " << r3 << std::endl;
         res = r1 * BigInteger(10).toPow(len) + (r3 - r1 - r2) * BigInteger(10).toPow(len / 2) + r2;
-        //std::cout << div << std::endl;
+        std::cout << div << std::endl;
         std::cout <<"res = " << (res / BigInteger(div)) << std::endl;
-        return res / BigInteger(div);
-    }
-    BigInteger kar_mul(BigInteger &&P, BigInteger &&n)
-    {
-    	return kar_mul(P, n);
+        return (res / BigInteger(div)) * BigInteger(sign) ;
     }
 
 };
