@@ -25,6 +25,10 @@ struct ellipse_curve_point
 			return 1;
 		return 0;
 	}
+	bool operator!=(const ellipse_curve_point &point)
+	{
+		return point.x != x || point.y != y;
+	}
 };
 
 class ellipse_curve_class
@@ -71,21 +75,35 @@ class ellipse_curve_class
 		ellipse_curve_point res;
 		BigInteger lambda;
 		
-		if ((Q.x - P.x) > (Q.y - P.y))
+		if (P != Q)
 			lambda = (kar_mul((Q.y - P.y) ,(Q.x - P.x).toPow(phi(curve.m) - 1))) % curve.m;
-		else if (P == Q)
-		{
-			if ((kar_mul(BigInteger(3) , P.x.toPow(2)) + curve.a) < BigInteger(2) * P.y)
-				lambda = (kar_mul((kar_mul(BigInteger(3) , P.x.toPow(2)) + curve.a), (BigInteger(2) * P.y).toPow(phi(curve.m) - 1)))%curve.m;
-			else
-				lambda = ((kar_mul(BigInteger(3) , P.x.toPow(2)) + curve.a) / (BigInteger(2) * P.y))%curve.m;
-		}
 		else
-			lambda = (Q.y - P.y) / (Q.x - P.x) % curve.m;
-		res.x = (lambda.toPow(2) -P.x -Q.x)%curve.m;
-		res.y = (kar_mul(std::move(lambda) ,(P.x - res.x)) - P.y) %curve.m;
+		{
+			//if ((kar_mul(BigInteger(3) , P.x.toPow(2)) + curve.a) < BigInteger(2) * P.y)
+				lambda = (kar_mul((kar_mul(BigInteger(3) , kar_mul(P.x, P.x)) + curve.a), (BigInteger(2) * P.y).toPow(phi(curve.m) - 1)))%curve.m;
+			//else
+			//	lambda = ((kar_mul(BigInteger(3) , P.x.toPow(2)) + curve.a) / (BigInteger(2) * P.y))%curve.m;
+		}
+		//else
+		//	lambda = (Q.y - P.y) / (Q.x - P.x) % curve.m;
+		res.x = (kar_mul(lambda, lambda) -P.x -Q.x) % curve.m;
+		res.y = (kar_mul(lambda ,(P.x - res.x)) - P.y) %curve.m;
 		
 		return (res);
+	}
+	ellipse_curve_point curve_point_mul(ellipse_curve_point &P, BigInteger n)
+	{
+		ellipse_curve_point res;
+		if (n.isZero())
+			return res;
+		n--;
+		while (!n.isZero())
+		{
+			res = curve_point_add(P, P);
+			n--;
+		}
+		return res;
+
 	}
 /*
     n = max(размер X, размер Y)
@@ -103,7 +121,8 @@ class ellipse_curve_class
         BigInteger res;
         int div = 1;
         int sign = 1;
-        unsigned int len = (bigIntegerToString(n)).length() > (bigIntegerToString(P)).length() ? (bigIntegerToString(n)).length() : (bigIntegerToString(P)).length();
+        unsigned int len;
+
         if (P.getSign() == -1 || n.getSign() == -1)
         {
         	sign = -1;
@@ -118,6 +137,7 @@ class ellipse_curve_class
         	else if (n.getSign() == -1)
         		n = -n;
         }
+        len = (bigIntegerToString(n)).length() > (bigIntegerToString(P)).length() ? (bigIntegerToString(n)).length() : (bigIntegerToString(P)).length();
         if (len == 1)
         {
         	res = P * n;
@@ -142,16 +162,16 @@ class ellipse_curve_class
         BigInteger X_r = P % divider;
         BigInteger Y_l = n / divider;
         BigInteger Y_r = n % divider;
-        std::cout <<"X_l = " << X_l << " X_r = "  << X_r << " Y_l = " << Y_l << " Y_r = " << Y_r<< std::endl;
-        BigInteger r1 = kar_mul(X_l , Y_l);
-        BigInteger r2 = kar_mul(X_r , Y_r);
+        //std::cout <<"X_l = " << X_l << " X_r = "  << X_r << " Y_l = " << Y_l << " Y_r = " << Y_r<< std::endl;
+        BigInteger r1 = X_l * Y_l;
+        BigInteger r2 = X_r * Y_r;
         BigInteger ar1(X_l + X_r);
         BigInteger ar2(Y_l + Y_r);
-        BigInteger r3 = kar_mul(ar1 , ar2);
-        std::cout <<"r1 = " << r1 << " r2 = "  << r2 << " r3 = " << r3 << std::endl;
+        BigInteger r3 = ar1 * ar2;
+        //std::cout <<"r1 = " << r1 << " r2 = "  << r2 << " r3 = " << r3 << std::endl;
         res = r1 * BigInteger(10).toPow(len) + (r3 - r1 - r2) * BigInteger(10).toPow(len / 2) + r2;
-        std::cout << div << std::endl;
-        std::cout <<"res = " << (res / BigInteger(div)) << std::endl;
+        //std::cout << div << std::endl;
+        //std::cout <<"res = " << (res / BigInteger(div)) << std::endl;
         return (res / BigInteger(div)) * BigInteger(sign) ;
     }
 
