@@ -87,7 +87,7 @@ public:
 	Index getCapacity() const { return mag.getCapacity(); }
 	Blk getBlock(Index i) const { return mag.getBlock(i); }
 	bool isZero() const { return sign == zero; } // A bit special
-	BigInteger toPow(BigInteger to)
+	BigInteger toPow(BigInteger to) const
 	{
 		BigInteger res(*this);
 		while (!(to -1).isZero())
