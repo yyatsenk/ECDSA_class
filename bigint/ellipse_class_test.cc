@@ -28,8 +28,9 @@ int main() {
 
 		*/
 
+		res = curve.curve_point_mul(P, 147);
 		// TEST_ME(function, arg1, arg2, expect)
-
+/*
 		TEST_ME(curve.curve_point_mul, P, 147, ellipse_curve_point(463, 15));
 		TEST_ME(curve.curve_point_mul, P, 0, ellipse_curve_point(0, 0));
 		TEST_ME(curve.curve_point_mul, P, -1, ellipse_curve_point(0, 0));
@@ -37,7 +38,7 @@ int main() {
 		TEST_ME(curve_1.curve_point_mul, P_1, 1, ellipse_curve_point(1, 16));
 		TEST_ME(curve_1.curve_point_mul, P_1, 0, ellipse_curve_point(0, 0));
 		TEST_ME(curve_1.curve_point_add, P_1, Q_1, ellipse_curve_point(5, 4));
-		TEST_ME(curve_1.curve_point_add, P, Q, ellipse_curve_point(16, 13));
+		TEST_ME(curve_1.curve_point_add, P, Q, ellipse_curve_point(16, 13));*/
 	}
 	catch(...)
 	{

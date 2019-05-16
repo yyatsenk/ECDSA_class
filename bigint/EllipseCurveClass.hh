@@ -3,7 +3,7 @@
 
 #include "BigIntegerLibrary.hh"
 #include <math.h>
-#include <vector>
+#include <stack>
 #include <map>
 #include <assert.h>
 
@@ -46,8 +46,9 @@ class ellipse_curve_class
 	virtual ~ellipse_curve_class();
 	
 	BigInteger phi(BigInteger n) const;
+	ellipse_curve_point recurs(ellipse_curve_point &P, int n, std::stack<int> step, std::map<int, ellipse_curve_point> &points);
 	ellipse_curve_point curve_point_add(ellipse_curve_point &P, ellipse_curve_point &Q) const;
-	ellipse_curve_point curve_point_mul(ellipse_curve_point &P, int n) const;
+	ellipse_curve_point curve_point_mul(ellipse_curve_point &P, int n);
 	ellipse_curve_point curve_point_mul(ellipse_curve_point &P, BigInteger n) const;
 	bool if_point_on_curve(ellipse_curve_point &P) const;
 	bool if_curve_sutable() const;
