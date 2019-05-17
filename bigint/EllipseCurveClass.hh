@@ -38,20 +38,21 @@ struct ellipse_curve_point
 class ellipse_curve_class
 {
 	ellipse_curve curve;
+
+	bool if_point_on_curve(ellipse_curve_point &P) const;
+	bool if_curve_sutable() const;
+	BigInteger phi(BigInteger n) const;
+    BigInteger kar_mul(BigInteger P, BigInteger n) const;
+	
 	public:
 	ellipse_curve_class();
 	ellipse_curve_class(BigInteger a, BigInteger b, BigUnsigned m);
 	ellipse_curve_class(const ellipse_curve_class &arg);
 	ellipse_curve_class &operator=(const ellipse_curve_class &arg);
-	virtual ~ellipse_curve_class();
+	~ellipse_curve_class();
 	
-	BigInteger phi(BigInteger n) const;
 	ellipse_curve_point curve_point_add(ellipse_curve_point &P, ellipse_curve_point &Q) const;
 	ellipse_curve_point curve_point_mul(ellipse_curve_point &P, int n) const;
-	ellipse_curve_point curve_point_mul(ellipse_curve_point &P, BigInteger n) const;
-	bool if_point_on_curve(ellipse_curve_point &P) const;
-	bool if_curve_sutable() const;
-    BigInteger kar_mul(BigInteger P, BigInteger n) const;
 	ellipse_curve get_curve() const;
 };
 

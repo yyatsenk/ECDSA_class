@@ -163,20 +163,6 @@ ellipse_curve_point ellipse_curve_class::curve_point_mul(ellipse_curve_point &P,
 	return (res);
 }
 
-ellipse_curve_point ellipse_curve_class::curve_point_mul(ellipse_curve_point &P, BigInteger n) const
-{
-    ellipse_curve_point res;
-	if (n.isZero())
-		return res;
-	n--;
-	while (!n.isZero())
-	{
-		res = curve_point_add(P, P);
-		n--;
-	}
-	return res;
-}
-
 // check if  y^2 = x^3 + a * x + b (mod m)
 bool ellipse_curve_class::if_point_on_curve(ellipse_curve_point &P) const
 {
