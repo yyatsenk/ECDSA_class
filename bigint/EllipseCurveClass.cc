@@ -99,12 +99,12 @@ ellipse_curve_point ellipse_curve_class::curve_point_add(ellipse_curve_point &P,
 	return (res);
 }
 
-ellipse_curve_point ellipse_curve_class::recurs(ellipse_curve_point &P, int n, std::stack<int> step, std::map<int, ellipse_curve_point> &points)
+ellipse_curve_point ellipse_curve_class::fill_map_with_points(ellipse_curve_point &P, std::stack<int> step, std::map<int, ellipse_curve_point> &points)
 {
 	ellipse_curve_point res;
 	int len = step.size();
 	std::stack<int> stack_copy(step);
-	std::cout << len << std::endl;
+
 	if (len == 1 && step.top() == 0)
 	{
 		points.insert(std::make_pair(0, P));
@@ -112,9 +112,9 @@ ellipse_curve_point ellipse_curve_class::recurs(ellipse_curve_point &P, int n, s
 	}
 	else if (len == 1 && step.top() != 0)
 	{
-		int i = 0;
+		int i = -1;
 		res = P;
-		while (i < step.top())
+		while (++i < step.top())
 			res = curve_point_add(res, res);
 		points.insert(std::make_pair(i, res));
 		return res;
@@ -122,12 +122,23 @@ ellipse_curve_point ellipse_curve_class::recurs(ellipse_curve_point &P, int n, s
 	if (points.find(step.top() - 1) == points.end())
 	{
 		stack_copy.pop();
-		this->recurs(P, n, stack_copy, points);
+		fill_map_with_points(P, stack_copy, points);
 	}
-	if (step.top() != 0 && points.find(step.top()-1) != points.end())
+	if (step.top() != 0 && points.find(step.top() - 1) != points.end())
 	{
-		auto a =  points.find(step.top()-1);
+		auto a =  points.find(step.top() - 1);
 		res = curve_point_add(a->second, a->second);
+		points.insert(std::make_pair(step.top(), res));
+	}
+	else
+	{
+		auto it = points.rbegin();
+		int i;
+
+		i = it->first - 1;
+		res = it->second;
+		while (++i != step.top())
+			res = curve_point_add(res, res);
 		points.insert(std::make_pair(step.top(), res));
 	}
 	return res;
@@ -139,31 +150,25 @@ ellipse_curve_point ellipse_curve_class::curve_point_mul(ellipse_curve_point &P,
 	std::stack<int> step;
 	std::map<int, ellipse_curve_point> points;
 	int i = 0;
-	int size = 0;
-	int start = 0;
 	
     if (!n || n < 0)
 		return res;
-	while (n != 0)
+	while (n != 0)	// get n in binary
 	{
 		if (n % 2 == 1)
-		{
-			size++;
 			step.push(i);
-		}
 		n = n / 2;
 		i++;
 	}
-	recurs(P, n, step, points);
+	fill_map_with_points(P, step, points); //get map elems
 	res = points[(step.top())];
-       while (!step.empty())
-	   {
-			step.pop();
-			if (step.empty())
-				break;
-        	res = curve_point_add(res, points[step.top()]);
-	   }
-	std::cout << res.x << " " << res.y << std::endl;
+    while (!step.empty())		//add all elems of map
+	{
+		step.pop();
+		if (step.empty())
+			break;
+        res = curve_point_add(res, points[step.top()]);
+	}
 	return (res);
 }
 
@@ -215,9 +220,9 @@ bool ellipse_curve_class::if_curve_sutable() const
     X_r = правые n/2 цифр X
     Y_l = левые n/2 цифр Y
     Y_r = правые n/2 цифр Y
-    Prod1 = Karatsuba_mul(X_l, Y_l)
-    Prod2 = Karatsuba_mul(X_r, Y_r)
-    Prod3 = Karatsuba_mul(X_l + X_r, Y_l + Y_r)
+    Prod1 = kar_mul(X_l, Y_l)
+    Prod2 = kar_mul(X_r, Y_r)
+    Prod3 = kar_mul(X_l + X_r, Y_l + Y_r)
     вернуть Prod1 * 10 ^ n + (Prod3 - Prod1 - Prod2) * 10 ^ (n / 2) + Prod2
 */
 

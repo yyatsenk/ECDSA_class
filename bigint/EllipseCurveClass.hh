@@ -5,13 +5,23 @@
 #include <math.h>
 #include <stack>
 #include <map>
-#include <assert.h>
 
+#ifdef __linux__
+	#define PASSED "\t\033[1;32m[PASSED]\033[0m"
+	#define FAILED "\t\033[1;31m[FAILED]\033[0m"
+#else
+	#define PASSED "\t[PASSED]"
+	#define FAILED "\t[FAILED]"
+#endif
 
-#define TEST_ME(function, arg1, arg2, expect) 										\
-{																					\
-	assert(function(arg1, arg2) == expect);											\
-	std::cout << "res.x = " << expect.x << "\t res.y = " << expect.y << std::endl;	\
+#define TEST_ME(function, arg1, arg2, expect) 					\
+{																\
+	if(function(arg1, arg2) == expect)							\
+		std::cout << "res.x = " << expect.x << "\t res.y = "	\
+		<< expect.y << PASSED << std::endl;						\
+	else														\
+		std::cout << "res.x != " << expect.x << "\t res.y != "	\
+		<< expect.y << FAILED << std::endl;						\
 }
 
 struct ellipse_curve
@@ -46,7 +56,7 @@ class ellipse_curve_class
 	virtual ~ellipse_curve_class();
 	
 	BigInteger phi(BigInteger n) const;
-	ellipse_curve_point recurs(ellipse_curve_point &P, int n, std::stack<int> step, std::map<int, ellipse_curve_point> &points);
+	ellipse_curve_point fill_map_with_points(ellipse_curve_point &P, std::stack<int> step, std::map<int, ellipse_curve_point> &points);
 	ellipse_curve_point curve_point_add(ellipse_curve_point &P, ellipse_curve_point &Q) const;
 	ellipse_curve_point curve_point_mul(ellipse_curve_point &P, int n);
 	ellipse_curve_point curve_point_mul(ellipse_curve_point &P, BigInteger n) const;
