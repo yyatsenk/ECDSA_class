@@ -7,8 +7,8 @@
 
 int main() {
 	try {
-		ellipse_curve_class curve(BigInteger(-1), BigInteger(1), BigUnsigned(stringToBigUnsigned(std::string("751"))));
-		ellipse_curve_class curve_1(BigInteger(1), BigInteger(1), BigUnsigned(stringToBigUnsigned(std::string("23"))));
+        ellipse_curve_class curve(BigInteger(-1), BigInteger(1), BigUnsigned(std::string("751")));
+        ellipse_curve_class curve_1(BigInteger(1), BigInteger(1), BigUnsigned(std::string("23")));
 		
 		ellipse_curve_point P(BigInteger(78), BigInteger(480));
 		ellipse_curve_point Q(BigInteger(16), BigInteger(102));
