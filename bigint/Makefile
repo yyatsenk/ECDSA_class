@@ -3,14 +3,13 @@ all:
 
 # Implicit rule to compile C++ files.  Modify to your taste.
 %.o: %.cc
-	g++ -c -O2 -Wall -Wextra -pedantic $<
+	g++ -c -O2 -Wall -Wextra -pedantic -std=c++11 $<
 
 # Components of the library.
 library-objects = \
 	BigUnsigned.o \
 	BigInteger.o \
-	BigIntegerAlgorithms.o \
-	BigUnsignedInABase.o \
+        BigIntegerAlgorithms.o \
 	BigIntegerUtils.o \
 	EllipseCurveClass.o \
 
@@ -18,8 +17,7 @@ library-headers = \
 	NumberlikeArray.hh \
 	BigUnsigned.hh \
 	BigInteger.hh \
-	BigIntegerAlgorithms.hh \
-	BigUnsignedInABase.hh \
+        BigIntegerAlgorithms.hh \
 	BigIntegerLibrary.hh \
 
 library: $(library-objects)
