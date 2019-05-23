@@ -3,15 +3,25 @@
 
 #include "BigIntegerLibrary.hh"
 #include <math.h>
-#include <vector>
+#include <stack>
 #include <map>
-#include <assert.h>
 
+#ifdef __linux__
+	#define PASSED "\t\033[1;32m[PASSED]\033[0m"
+	#define FAILED "\t\033[1;31m[FAILED]\033[0m"
+#else
+	#define PASSED "\t[PASSED]"
+	#define FAILED "\t[FAILED]"
+#endif
 
-#define TEST_ME(function, arg1, arg2, expect) 										\
-{																					\
-	assert(function(arg1, arg2) == expect);											\
-	std::cout << "res.x = " << expect.x << "\t res.y = " << expect.y << std::endl;	\
+#define TEST_ME(function, arg1, arg2, expect) 					\
+{																\
+	if(function(arg1, arg2) == expect)							\
+		std::cout << "res.x = " << expect.x << "\t res.y = "	\
+		<< expect.y << PASSED << std::endl;						\
+	else														\
+		std::cout << "res.x != " << expect.x << "\t res.y != "	\
+		<< expect.y << FAILED << std::endl;						\
 }
 
 struct ellipse_curve
