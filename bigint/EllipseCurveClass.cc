@@ -99,7 +99,8 @@ ellipse_curve_point ellipse_curve_class::curve_point_add(ellipse_curve_point &P,
 	return (res);
 }
 
-ellipse_curve_point ellipse_curve_class::fill_map_with_points(ellipse_curve_point &P, std::stack<int> step, std::map<int, ellipse_curve_point> &points)
+ellipse_curve_point ellipse_curve_class::fill_map_with_points(ellipse_curve_point &P, std::stack<int> step,\
+std::map<int, ellipse_curve_point> &points) const
 {
 	ellipse_curve_point res;
 	int len = step.size();
@@ -144,7 +145,7 @@ ellipse_curve_point ellipse_curve_class::fill_map_with_points(ellipse_curve_poin
 	return res;
 }
 
-ellipse_curve_point ellipse_curve_class::curve_point_mul(ellipse_curve_point &P, int n) 
+ellipse_curve_point ellipse_curve_class::curve_point_mul(ellipse_curve_point &P, int n) const
 {
 	ellipse_curve_point res;
 	std::stack<int> step;

@@ -53,6 +53,8 @@ class ellipse_curve_class
 	bool if_curve_sutable() const;
 	BigInteger phi(BigInteger n) const;
     BigInteger kar_mul(BigInteger P, BigInteger n) const;
+	ellipse_curve_point fill_map_with_points(ellipse_curve_point &P, std::stack<int> step,\
+	std::map<int, ellipse_curve_point> &points) const;
 	
 	public:
 	ellipse_curve_class();
