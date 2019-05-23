@@ -205,57 +205,83 @@ bool ellipse_curve_class::if_curve_sutable() const
 
 BigInteger ellipse_curve_class::kar_mul(BigInteger P, BigInteger n) const
 {
+//    BigInteger res;
+//    int div = 1;
+//    int sign = 1;
+//    unsigned int len;
+
+//    if (P.getSign() == -1 || n.getSign() == -1)
+//    {
+//        sign = -1;
+//        if (P.getSign() == -1 && n.getSign() == -1)
+//        {
+//            P = -P;
+//            n = -n;
+//            sign = 1;
+//        }
+//        else if (P.getSign() == -1)
+//            P = -P;
+//        else if (n.getSign() == -1)
+//            n = -n;
+//    }
+//    len = (bigIntegerToString(n)).length() > (bigIntegerToString(P)).length() ? (bigIntegerToString(n)).length() : (bigIntegerToString(P)).length();
+//    if (len == 1)
+//    {
+//        res = P * n;
+//        return (res * sign);
+//    }
+//    if ((bigIntegerToString(n)).length()%2)
+//    {
+//        n *= BigInteger(10);
+//        if (len % 2)
+//        	len++;
+//        div *= 10;
+//    }
+//    if ((bigIntegerToString(P)).length()%2)
+//    {
+//        P *= BigInteger(10);
+//        if (len % 2)
+//        	len++;
+//        div *= 10;
+//    }
+//    BigInteger divider(BigInteger(10).toPow(len/2));
+//    BigInteger X_l = P / divider;
+//    BigInteger X_r = P % divider;
+//    BigInteger Y_l = n / divider;
+//    BigInteger Y_r = n % divider;
+//    BigInteger r1 = kar_mul(X_l , Y_l);
+//    BigInteger r2 = kar_mul(X_r , Y_r);
+//    BigInteger ar1(X_l + X_r);
+//    BigInteger ar2(Y_l + Y_r);
+//    BigInteger r3 = kar_mul(ar1 , ar2);
+//    res = r1 * BigInteger(10).toPow(len) + (r3 - r1 - r2) * BigInteger(10).toPow(len / 2) + r2;
+//    return (res / BigInteger(div)) * BigInteger(sign) ;
+
     BigInteger res;
-    int div = 1;
-    int sign = 1;
     unsigned int len;
 
-    if (P.getSign() == -1 || n.getSign() == -1)
-    {
-        sign = -1;
-        if (P.getSign() == -1 && n.getSign() == -1)
-        {
-        	P = -P;
-        	n = -n;
-        	sign = 1;
-        }
-        else if (P.getSign() == -1)
-        	P = -P;
-        else if (n.getSign() == -1)
-        	n = -n;
-    }
-    len = (bigIntegerToString(n)).length() > (bigIntegerToString(P)).length() ? (bigIntegerToString(n)).length() : (bigIntegerToString(P)).length();
-    if (len == 1)
-    {
-        res = P * n;
-        return (res * sign);
-    }
-    if ((bigIntegerToString(n)).length()%2)
-    {
-        n *= BigInteger(10);
-        if (len % 2)
-        	len++;
-        div *= 10;
-    }
-    if ((bigIntegerToString(P)).length()%2)
-    {
-        P *= BigInteger(10);
-        if (len % 2)
-        	len++;
-        div *= 10;
-    }
-    BigInteger divider(BigInteger(10).toPow(len/2));
+    len = n.getLength() > P.getLength() ? n.getLength() : P.getLength();
+    if (len <= 10)
+        return P * n;
+
+    len = (len/2) + (len%2);
+
+    BigInteger divider(base.toPow(len));
+
     BigInteger X_l = P / divider;
     BigInteger X_r = P % divider;
     BigInteger Y_l = n / divider;
     BigInteger Y_r = n % divider;
-    BigInteger r1 = kar_mul(X_l , Y_l);
-    BigInteger r2 = kar_mul(X_r , Y_r);
-    BigInteger ar1(X_l + X_r);
-    BigInteger ar2(Y_l + Y_r);
-    BigInteger r3 = kar_mul(ar1 , ar2);
-    res = r1 * BigInteger(10).toPow(len) + (r3 - r1 - r2) * BigInteger(10).toPow(len / 2) + r2;
-    return (res / BigInteger(div)) * BigInteger(sign) ;
+
+    BigInteger z2 = kar_mul(X_l , Y_l);
+    BigInteger z0 = kar_mul(X_r , Y_r);
+
+    BigInteger z11(X_l + X_r);
+    BigInteger z12(Y_l + Y_r);
+    BigInteger z1 = kar_mul(z11 , z12);
+
+    res = z0 + ((z1 - z2 - z0) * divider) + (z2 * base.toPow(len * 2));
+    return res;
 }
 
 ellipse_curve ellipse_curve_class::get_curve() const

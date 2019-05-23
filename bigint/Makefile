@@ -9,14 +9,14 @@ all:
 library-objects = \
 	BigUnsigned.o \
         BigInteger.o \
-	BigIntegerUtils.o \
+        IOUtils.o \
 	EllipseCurveClass.o \
 
 library-headers = \
         NumInBlocks.hh \
 	BigUnsigned.hh \
         BigInteger.hh \
-	BigIntegerLibrary.hh \
+        BigIntegerLibrary.hh \
 
 library: $(library-objects)
 

@@ -38,6 +38,7 @@ struct ellipse_curve_point
 class ellipse_curve_class
 {
 	ellipse_curve curve;
+    BigInteger base = BigInteger(2).toPow(BigUnsigned::N);
 
 	bool if_point_on_curve(ellipse_curve_point &P) const;
 	bool if_curve_sutable() const;
