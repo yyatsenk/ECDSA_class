@@ -107,6 +107,53 @@ long           BigInteger::toLong         () const { return convertToSignedPrimi
 int            BigInteger::toInt          () const { return convertToSignedPrimitive  <int  , unsigned int>  (); }
 short          BigInteger::toShort        () const { return convertToSignedPrimitive  <short, unsigned short>(); }
 
+BigInteger BigInteger::karatsubaMul(BigInteger x, BigInteger y) const
+{
+    static BigInteger base = BigInteger(2).toPow(BigUnsigned::N);
+    BigInteger res;
+    Index len;
+
+    len = y.getLength() > x.getLength() ? y.getLength() : x.getLength();
+    if (len <= 1) // it is not efficient to use Karatsuba alghrothim for small numbers
+    {
+        BigInteger ans;
+        ans.multiply(x, y);
+        return ans;
+    }
+
+    len = (len/2) + (len%2);
+
+    BigInteger divider(base.toPow(len));
+
+    BigInteger X_l = x / divider;
+    BigInteger X_r = x % divider;
+    BigInteger Y_l = y / divider;
+    BigInteger Y_r = y % divider;
+
+    BigInteger z0 = karatsubaMul(X_r , Y_r);
+    BigInteger z2 = karatsubaMul(X_l , Y_l);
+
+    BigInteger z11(X_l + X_r);
+    BigInteger z12(Y_l + Y_r);
+    BigInteger z1 = karatsubaMul(z11 , z12);
+
+    divider.multiply(divider, (z1 - z2 - z0));
+    z2.multiply(z2, base.toPow(len * 2));
+    res = z0 + divider + z2;
+    return res;
+}
+
+BigInteger BigInteger::toPow(BigInteger to) const
+{
+    BigInteger res(*this);
+    while (!(to -1).isZero())
+    {
+        res.multiply(res, *this);
+        to--;
+    }
+    return res;
+}
+
 // COMPARISON
 BigInteger::CmpRes BigInteger::compareTo(const BigInteger &x) const {
 	// A greater sign implies a greater number

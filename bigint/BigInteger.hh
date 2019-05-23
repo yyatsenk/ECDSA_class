@@ -65,17 +65,10 @@ public:
 	Index getLength() const { return mag.getLength(); }
 	Index getCapacity() const { return mag.getCapacity(); }
 	Block getBlock(Index i) const { return mag.getBlock(i); }
-	bool isZero() const { return sign == zero; } // A bit special
-	BigInteger toPow(BigInteger to) const
-	{
-		BigInteger res(*this);
-		while (!(to -1).isZero())
-		{
-			res = res * *this;
-			to--;
-		}
-		return res;
-	}
+    bool isZero() const { return sign == zero; }
+
+    BigInteger karatsubaMul(BigInteger P, BigInteger n) const;
+    BigInteger toPow(BigInteger to) const;
 
 	// COMPARISONS
 	CmpRes compareTo(const BigInteger &x) const;
@@ -130,9 +123,7 @@ inline BigInteger BigInteger::operator -(const BigInteger &x) const {
 	return ans;
 }
 inline BigInteger BigInteger::operator *(const BigInteger &x) const {
-	BigInteger ans;
-	ans.multiply(*this, x);
-	return ans;
+    return karatsubaMul(*this, x);
 }
 inline BigInteger BigInteger::operator /(const BigInteger &x) const {
 	if (x.isZero()) throw "BigInteger::operator /: division by zero";
@@ -161,7 +152,7 @@ inline void BigInteger::operator -=(const BigInteger &x) {
 	subtract(*this, x);
 }
 inline void BigInteger::operator *=(const BigInteger &x) {
-	multiply(*this, x);
+    *this = karatsubaMul(*this, x);
 }
 inline void BigInteger::operator /=(const BigInteger &x) {
 	if (x.isZero()) throw "BigInteger::operator /=: division by zero";

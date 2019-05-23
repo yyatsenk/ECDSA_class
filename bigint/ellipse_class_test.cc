@@ -4,20 +4,19 @@
 #include "BigIntegerLibrary.hh"
 #include "EllipseCurveClass.hh"
 
-
 int main() {
     try {
         ellipse_curve_class curve(BigInteger(-1), BigInteger(1), BigUnsigned(std::string("751")));
         ellipse_curve_class curve_1(BigInteger(1), BigInteger(1), BigUnsigned(std::string("23")));
-		
+
         ellipse_curve_point P(BigInteger(78), BigInteger(480));
         ellipse_curve_point Q(BigInteger(16), BigInteger(102));
 
         ellipse_curve_point P_1(BigInteger(1), BigInteger(16));
         ellipse_curve_point Q_1(BigInteger(19), BigInteger(18));
-		
+
         ellipse_curve_point res;
-		
+
 
         /* Example of usage :
 
