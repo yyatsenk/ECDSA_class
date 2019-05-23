@@ -8,16 +8,14 @@ all:
 # Components of the library.
 library-objects = \
 	BigUnsigned.o \
-	BigInteger.o \
-        BigIntegerAlgorithms.o \
+        BigInteger.o \
 	BigIntegerUtils.o \
 	EllipseCurveClass.o \
 
 library-headers = \
-	NumberlikeArray.hh \
+        NumInBlocks.hh \
 	BigUnsigned.hh \
-	BigInteger.hh \
-        BigIntegerAlgorithms.hh \
+        BigInteger.hh \
 	BigIntegerLibrary.hh \
 
 library: $(library-objects)
