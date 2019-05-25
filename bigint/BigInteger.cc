@@ -1,20 +1,19 @@
 #include "BigInteger.hh"
 
 void BigInteger::operator =(const BigInteger &x) {
-	// Calls like a = a have no effect
+
 	if (this == &x)
 		return;
-	// Copy sign
+
 	sign = x.sign;
-	// Copy the rest
 	mag = x.mag;
 }
 
-BigInteger::BigInteger(const Blk *b, Index blen, Sign s) : mag(b, blen) {
+BigInteger::BigInteger(const Block *b, Index blen, Sign s) : mag(b, blen) {
 	switch (s) {
 	case zero:
 		if (!mag.isZero())
-			throw "BigInteger::BigInteger(const Blk *, Index, Sign): Cannot use a sign of zero with a nonzero magnitude";
+			throw "BigInteger::BigInteger(const Block *, Index, Sign): Cannot use a sign of zero with a nonzero magnitude";
 		sign = zero;
 		break;
 	case positive:
@@ -23,9 +22,7 @@ BigInteger::BigInteger(const Blk *b, Index blen, Sign s) : mag(b, blen) {
 		sign = mag.isZero() ? zero : s;
 		break;
 	default:
-		/* g++ seems to be optimizing out this case on the assumption
-		 * that the sign is a valid member of the enumeration.  Oh well. */
-		throw "BigInteger::BigInteger(const Blk *, Index, Sign): Invalid sign";
+		throw "BigInteger::BigInteger(const Block *, Index, Sign): Invalid sign";
 	}
 }
 
@@ -37,34 +34,22 @@ BigInteger::BigInteger(const BigUnsigned &x, Sign s) : mag(x) {
 		sign = zero;
 		break;
 	case positive:
-	case negative:
-		// If the magnitude is zero, force the sign to zero.
+    case negative:
 		sign = mag.isZero() ? zero : s;
 		break;
 	default:
-		/* g++ seems to be optimizing out this case on the assumption
-		 * that the sign is a valid member of the enumeration.  Oh well. */
 		throw "BigInteger::BigInteger(const BigUnsigned &, Sign): Invalid sign";
 	}
 }
 
-/* CONSTRUCTION FROM PRIMITIVE INTEGERS
- * Same idea as in BigUnsigned.cc, except that negative input results in a
- * negative BigInteger instead of an exception. */
-
-// Done longhand to let us use initialization.
 BigInteger::BigInteger(unsigned long  x) : mag(x) { sign = mag.isZero() ? zero : positive; }
 BigInteger::BigInteger(unsigned int   x) : mag(x) { sign = mag.isZero() ? zero : positive; }
 BigInteger::BigInteger(unsigned short x) : mag(x) { sign = mag.isZero() ? zero : positive; }
 
-// For signed input, determine the desired magnitude and sign separately.
-
 namespace {
 	template <class X, class UX>
-	BigInteger::Blk magOf(X x) {
-		/* UX(...) cast needed to stop short(-2^15), which negates to
-		 * itself, from sign-extending in the conversion to Blk. */
-		return BigInteger::Blk(x < 0 ? UX(-x) : x);
+    BigInteger::Block magOf(X x) {
+		return BigInteger::Block(x < 0 ? UX(-x) : x);
 	}
 	template <class X>
 	BigInteger::Sign signOf(X x) {
@@ -80,10 +65,6 @@ BigInteger::BigInteger(short x) : sign(signOf(x)), mag(magOf<short, unsigned sho
 
 // CONVERSION TO PRIMITIVE INTEGERS
 
-/* Reuse BigUnsigned's conversion to an unsigned primitive integer.
- * The friend is a separate function rather than
- * BigInteger::convertToUnsignedPrimitive to avoid requiring BigUnsigned to
- * declare BigInteger. */
 template <class X>
 inline X convertBigUnsignedToPrimitiveAccess(const BigUnsigned &a) {
 	return a.convertToPrimitive<X>();
@@ -98,24 +79,19 @@ X BigInteger::convertToUnsignedPrimitive() const {
 		return convertBigUnsignedToPrimitiveAccess<X>(mag);
 }
 
-/* Similar to BigUnsigned::convertToPrimitive, but split into two cases for
- * nonnegative and negative numbers. */
 template <class X, class UX>
 X BigInteger::convertToSignedPrimitive() const {
 	if (sign == zero)
 		return 0;
-	else if (mag.getLength() == 1) {
-		// The single block might fit in an X.  Try the conversion.
-		Blk b = mag.getBlock(0);
+    else if (mag.getLength() == 1) {
+		Block b = mag.getBlock(0);
 		if (sign == positive) {
 			X x = X(b);
-			if (x >= 0 && Blk(x) == b)
+			if (x >= 0 && Block(x) == b)
 				return x;
 		} else {
-			X x = -X(b);
-			/* UX(...) needed to avoid rejecting conversion of
-			 * -2^15 to a short. */
-			if (x < 0 && Blk(UX(-x)) == b)
+            X x = -X(b);
+			if (x < 0 && Block(UX(-x)) == b)
 				return x;
 		}
 		// Otherwise fall through.
@@ -130,6 +106,53 @@ unsigned short BigInteger::toUnsignedShort() const { return convertToUnsignedPri
 long           BigInteger::toLong         () const { return convertToSignedPrimitive  <long , unsigned long> (); }
 int            BigInteger::toInt          () const { return convertToSignedPrimitive  <int  , unsigned int>  (); }
 short          BigInteger::toShort        () const { return convertToSignedPrimitive  <short, unsigned short>(); }
+
+BigInteger BigInteger::karatsubaMul(BigInteger x, BigInteger y) const
+{
+    static BigInteger base = BigInteger(2).toPow(BigUnsigned::N);
+    BigInteger res;
+    Index len;
+
+    len = y.getLength() > x.getLength() ? y.getLength() : x.getLength();
+    if (len <= 1) // it is not efficient to use Karatsuba alghrothim for small numbers
+    {
+        BigInteger ans;
+        ans.multiply(x, y);
+        return ans;
+    }
+
+    len = (len/2) + (len%2);
+
+    BigInteger divider(base.toPow(len));
+
+    BigInteger X_l = x / divider;
+    BigInteger X_r = x % divider;
+    BigInteger Y_l = y / divider;
+    BigInteger Y_r = y % divider;
+
+    BigInteger z0 = karatsubaMul(X_r , Y_r);
+    BigInteger z2 = karatsubaMul(X_l , Y_l);
+
+    BigInteger z11(X_l + X_r);
+    BigInteger z12(Y_l + Y_r);
+    BigInteger z1 = karatsubaMul(z11 , z12);
+
+    divider.multiply(divider, (z1 - z2 - z0));
+    z2.multiply(z2, base.toPow(len * 2));
+    res = z0 + divider + z2;
+    return res;
+}
+
+BigInteger BigInteger::toPow(BigInteger to) const
+{
+    BigInteger res(*this);
+    while (!(to -1).isZero())
+    {
+        res.multiply(res, *this);
+        to--;
+    }
+    return res;
+}
 
 // COMPARISON
 BigInteger::CmpRes BigInteger::compareTo(const BigInteger &x) const {
@@ -153,12 +176,7 @@ BigInteger::CmpRes BigInteger::compareTo(const BigInteger &x) const {
 	}
 }
 
-/* COPY-LESS OPERATIONS
- * These do some messing around to determine the sign of the result,
- * then call one of BigUnsigned's copy-less operations. */
-
-// See remarks about aliased calls in BigUnsigned.cc .
-#define DTRT_ALIASED(cond, op) \
+#define CONDITION_OP(cond, op) \
 	if (cond) { \
 		BigInteger tmpThis; \
 		tmpThis.op; \
@@ -167,27 +185,21 @@ BigInteger::CmpRes BigInteger::compareTo(const BigInteger &x) const {
 	}
 
 void BigInteger::add(const BigInteger &a, const BigInteger &b) {
-	DTRT_ALIASED(this == &a || this == &b, add(a, b));
+    CONDITION_OP(this == &a || this == &b, add(a, b));
 	// If one argument is zero, copy the other.
 	if (a.sign == zero)
 		operator =(b);
 	else if (b.sign == zero)
-		operator =(a);
-	// If the arguments have the same sign, take the
-	// common sign and add their magnitudes.
+        operator =(a);
 	else if (a.sign == b.sign) {
 		sign = a.sign;
 		mag.add(a.mag, b.mag);
-	} else {
-		// Otherwise, their magnitudes must be compared.
+    } else {
 		switch (a.mag.compareTo(b.mag)) {
-		case equal:
-			// If their magnitudes are the same, copy zero.
+        case equal:
 			mag = 0;
 			sign = zero;
-			break;
-			// Otherwise, take the sign of the greater, and subtract
-			// the lesser magnitude from the greater magnitude.
+            break;
 		case greater:
 			sign = a.sign;
 			mag.subtract(a.mag, b.mag);
@@ -201,37 +213,26 @@ void BigInteger::add(const BigInteger &a, const BigInteger &b) {
 }
 
 void BigInteger::subtract(const BigInteger &a, const BigInteger &b) {
-	// Notice that this routine is identical to BigInteger::add,
-	// if one replaces b.sign by its opposite.
-	DTRT_ALIASED(this == &a || this == &b, subtract(a, b));
+    CONDITION_OP(this == &a || this == &b, subtract(a, b));
 	// If a is zero, copy b and flip its sign.  If b is zero, copy a.
 	if (a.sign == zero) {
 		mag = b.mag;
-		// Take the negative of _b_'s, sign, not ours.
-		// Bug pointed out by Sam Larkin on 2005.03.30.
 		sign = Sign(-b.sign);
 	} else if (b.sign == zero)
-		operator =(a);
-	// If their signs differ, take a.sign and add the magnitudes.
+        operator =(a);
 	else if (a.sign != b.sign) {
 		sign = a.sign;
 		mag.add(a.mag, b.mag);
-	} else {
-		// Otherwise, their magnitudes must be compared.
-		switch (a.mag.compareTo(b.mag)) {
-			// If their magnitudes are the same, copy zero.
+    } else {
+        switch (a.mag.compareTo(b.mag)) {
 		case equal:
 			mag = 0;
 			sign = zero;
-			break;
-			// If a's magnitude is greater, take a.sign and
-			// subtract a from b.
+            break;
 		case greater:
 			sign = a.sign;
 			mag.subtract(a.mag, b.mag);
-			break;
-			// If b's magnitude is greater, take the opposite
-			// of b.sign and subtract b from a.
+            break;
 		case less:
 			sign = Sign(-b.sign);
 			mag.subtract(b.mag, a.mag);
@@ -241,45 +242,18 @@ void BigInteger::subtract(const BigInteger &a, const BigInteger &b) {
 }
 
 void BigInteger::multiply(const BigInteger &a, const BigInteger &b) {
-	DTRT_ALIASED(this == &a || this == &b, multiply(a, b));
-	// If one object is zero, copy zero and return.
+    CONDITION_OP(this == &a || this == &b, multiply(a, b));
 	if (a.sign == zero || b.sign == zero) {
 		sign = zero;
 		mag = 0;
 		return;
 	}
-	// If the signs of the arguments are the same, the result
-	// is positive, otherwise it is negative.
+
 	sign = (a.sign == b.sign) ? positive : negative;
-	// Multiply the magnitudes.
 	mag.multiply(a.mag, b.mag);
 }
 
-/*
- * DIVISION WITH REMAINDER
- * Please read the comments before the definition of
- * `BigUnsigned::divideWithRemainder' in `BigUnsigned.cc' for lots of
- * information you should know before reading this function.
- *
- * Following Knuth, I decree that x / y is to be
- * 0 if y==0 and floor(real-number x / y) if y!=0.
- * Then x % y shall be x - y*(integer x / y).
- *
- * Note that x = y * (x / y) + (x % y) always holds.
- * In addition, (x % y) is from 0 to y - 1 if y > 0,
- * and from -(|y| - 1) to 0 if y < 0.  (x % y) = x if y = 0.
- *
- * Examples: (q = a / b, r = a % b)
- *	a	b	q	r
- *	===	===	===	===
- *	4	3	1	1
- *	-4	3	-2	2
- *	4	-3	-2	-2
- *	-4	-3	1	-1
- */
 void BigInteger::divideWithRemainder(const BigInteger &b, BigInteger &q) {
-	// Defend against aliased calls;
-	// same idea as in BigUnsigned::divideWithRemainder .
 	if (this == &q)
 		throw "BigInteger::divideWithRemainder: Cannot write quotient and remainder into the same variable";
 	if (this == &b || &q == &b) {
@@ -288,88 +262,51 @@ void BigInteger::divideWithRemainder(const BigInteger &b, BigInteger &q) {
 		return;
 	}
 
-	// Division by zero gives quotient 0 and remainder *this
 	if (b.sign == zero) {
 		q.mag = 0;
 		q.sign = zero;
 		return;
-	}
-	// 0 / b gives quotient 0 and remainder 0
+    }
+
 	if (sign == zero) {
 		q.mag = 0;
 		q.sign = zero;
 		return;
 	}
 
-	// Here *this != 0, b != 0.
-
-	// Do the operands have the same sign?
-	if (sign == b.sign) {
-		// Yes: easy case.  Quotient is zero or positive.
+    if (sign == b.sign) {
 		q.sign = positive;
-	} else {
-		// No: harder case.  Quotient is negative.
-		q.sign = negative;
-		// Decrease the magnitude of the dividend by one.
+    } else {
+        q.sign = negative;
 		mag--;
-		/*
-		 * We tinker with the dividend before and with the
-		 * quotient and remainder after so that the result
-		 * comes out right.  To see why it works, consider the following
-		 * list of examples, where A is the magnitude-decreased
-		 * a, Q and R are the results of BigUnsigned division
-		 * with remainder on A and |b|, and q and r are the
-		 * final results we want:
-		 *
-		 *	a	A	b	Q	R	q	r
-		 *	-3	-2	3	0	2	-1	0
-		 *	-4	-3	3	1	0	-2	2
-		 *	-5	-4	3	1	1	-2	1
-		 *	-6	-5	3	1	2	-2	0
-		 *
-		 * It appears that we need a total of 3 corrections:
-		 * Decrease the magnitude of a to get A.  Increase the
-		 * magnitude of Q to get q (and make it negative).
-		 * Find r = (b - 1) - R and give it the desired sign.
-		 */
 	}
 
-	// Divide the magnitudes.
 	mag.divideWithRemainder(b.mag, q.mag);
 
-	if (sign != b.sign) {
-		// More for the harder case (as described):
-		// Increase the magnitude of the quotient by one.
-		q.mag++;
-		// Modify the remainder.
+    if (sign != b.sign) {
+        q.mag++;
 		mag.subtract(b.mag, mag);
 		mag--;
-	}
+    }
 
-	// Sign of the remainder is always the sign of the divisor b.
 	sign = b.sign;
 
-	// Set signs to zero as necessary.  (Thanks David Allen!)
 	if (mag.isZero())
 		sign = zero;
 	if (q.mag.isZero())
 		q.sign = zero;
-
-	// WHEW!!!
 }
 
 // Negation
 void BigInteger::negate(const BigInteger &a) {
-	DTRT_ALIASED(this == &a, negate(a));
-	// Copy a's magnitude
+    CONDITION_OP(this == &a, negate(a));
+
 	mag = a.mag;
-	// Copy the opposite of a.sign
 	sign = Sign(-a.sign);
 }
 
 // INCREMENT/DECREMENT OPERATORS
 
-// Prefix increment
 void BigInteger::operator ++() {
 	if (sign == negative) {
 		mag--;
@@ -377,16 +314,14 @@ void BigInteger::operator ++() {
 			sign = zero;
 	} else {
 		mag++;
-		sign = positive; // if not already
+        sign = positive;
 	}
 }
 
-// Postfix increment: same as prefix
 void BigInteger::operator ++(int) {
 	operator ++();
 }
 
-// Prefix decrement
 void BigInteger::operator --() {
 	if (sign == positive) {
 		mag--;
@@ -398,7 +333,6 @@ void BigInteger::operator --() {
 	}
 }
 
-// Postfix decrement: same as prefix
 void BigInteger::operator --(int) {
 	operator --();
 }

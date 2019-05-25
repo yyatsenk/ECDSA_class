@@ -26,27 +26,27 @@ void ellipse_curve_point::set_zero()
 
 bool ellipse_curve_point::operator==(const ellipse_curve_point &point)
 {
-	if (x == point.x && y == point.y)
-		return 1;
-	return 0;
+    if (x == point.x && y == point.y)
+        return 1;
+    return 0;
 }
 
 bool ellipse_curve_point::operator!=(const ellipse_curve_point &point)
 {
-	return point.x != x || point.y != y;
+    return point.x != x || point.y != y;
 }
 
 ellipse_curve_class::ellipse_curve_class()
 {}
 ellipse_curve_class::ellipse_curve_class(BigInteger a, BigInteger b, BigUnsigned m)
 {
-	curve.a = a;
-	curve.b = b;
-	curve.m = m;
+    curve.a = a;
+    curve.b = b;
+    curve.m = m;
 }
 ellipse_curve_class::ellipse_curve_class(const ellipse_curve_class &arg)
 {
-	curve = arg.curve;
+    curve = arg.curve;
 }
 ellipse_curve_class::~ellipse_curve_class()
 {}
@@ -61,42 +61,42 @@ ellipse_curve_class &ellipse_curve_class::operator=(const ellipse_curve_class &a
 }
 BigInteger ellipse_curve_class::phi(BigInteger n) const
 {
-	BigInteger ret(1);
+    BigInteger ret(1);
 
-	for(BigInteger i(2); i * i <= n; i++)
-	{
-		BigInteger p(1);
-		while(n % i == BigInteger(0))
-		{
-			p = p * i;
-			n = n / i;
-		}
-		p = p / i;
-		if(!p.isZero() && p >= BigInteger(1))
-		{
-			ret = ret * p * (i - BigInteger(1));
-			p = p / i;
-		}
-	}
-	n = n - 1;
-	if (n != BigInteger(0))
-		return n * ret;
-	return ret;
+    for(BigInteger i(2); i * i <= n; i++)
+    {
+        BigInteger p(1);
+        while(n % i == BigInteger(0))
+        {
+            p = p * i;
+            n = n / i;
+        }
+        p = p / i;
+        if(!p.isZero() && p >= BigInteger(1))
+        {
+            ret = ret * p * (i - BigInteger(1));
+            p = p / i;
+        }
+    }
+    n = n - 1;
+    if (n != BigInteger(0))
+        return n * ret;
+    return ret;
 }
 
 ellipse_curve_point ellipse_curve_class::curve_point_add(ellipse_curve_point &P, ellipse_curve_point &Q) const
 {
-	ellipse_curve_point res;
-	BigInteger lambda;
+    ellipse_curve_point res;
+    BigInteger lambda;
 
-	if (P != Q)
-		lambda = (kar_mul((Q.y - P.y) ,(Q.x - P.x).toPow(phi(curve.m) - 1))) % curve.m;
-	else
-		lambda = (kar_mul((kar_mul(BigInteger(3) , kar_mul(P.x, P.x)) + curve.a), (BigInteger(2) * P.y).toPow(phi(curve.m) - 1)))%curve.m;
-	res.x = (kar_mul(lambda, lambda) -P.x - Q.x) % curve.m;
-	res.y = (kar_mul(lambda ,(P.x - res.x)) - P.y) % curve.m;
+    if (P != Q)
+        lambda = (((Q.y - P.y)  * (Q.x - P.x).toPow(phi(curve.m) - 1))) % curve.m;
+    else
+        lambda = ((((BigInteger(3) * (P.x * P.x)) + curve.a)* (BigInteger(2) * P.y).toPow(phi(curve.m) - 1)))%curve.m;
+    res.x = ((lambda * lambda) -P.x - Q.x) % curve.m;
+    res.y = ((lambda * (P.x - res.x)) - P.y) % curve.m;
 
-	return (res);
+    return (res);
 }
 
 ellipse_curve_point ellipse_curve_class::fill_map_with_points(ellipse_curve_point &P, std::stack<int> step,\
@@ -176,13 +176,13 @@ ellipse_curve_point ellipse_curve_class::curve_point_mul(ellipse_curve_point &P,
 // check if  y^2 = x^3 + a * x + b (mod m)
 bool ellipse_curve_class::if_point_on_curve(ellipse_curve_point &P) const
 {
-	BigInteger y_equation;
-	BigInteger x_equation;
+    BigInteger y_equation;
+    BigInteger x_equation;
 
-	y_equation = kar_mul(P.y, P.y) % curve.m;
-	x_equation = (P.x.toPow(3) + kar_mul(curve.a , P.x) + curve.b) % curve.m;
+    y_equation = (P.y * P.y) % curve.m;
+    x_equation = (P.x.toPow(3) + (curve.a * P.x) + curve.b) % curve.m;
 
-	return y_equation == x_equation;
+    return y_equation == x_equation;
 }
 
 // check if 4*a^3 + 27*b^2 ≠ 0 (mod m)
@@ -216,59 +216,15 @@ bool ellipse_curve_class::if_curve_sutable() const
 BigInteger ellipse_curve_class::kar_mul(BigInteger P, BigInteger n) const
 {
     BigInteger res;
-    int div = 1;
-    int sign = 1;
-    unsigned int len;
 
-    if (P.getSign() == -1 || n.getSign() == -1)
-    {
-        sign = -1;
-        if (P.getSign() == -1 && n.getSign() == -1)
-        {
-        	P = -P;
-        	n = -n;
-        	sign = 1;
-        }
-        else if (P.getSign() == -1)
-        	P = -P;
-        else if (n.getSign() == -1)
-        	n = -n;
-    }
-    len = (bigIntegerToString(n)).length() > (bigIntegerToString(P)).length() ? (bigIntegerToString(n)).length() : (bigIntegerToString(P)).length();
-    if (len == 1)
-    {
-        res = P * n;
-        return (res * sign);
-    }
-    if ((bigIntegerToString(n)).length()%2)
-    {
-        n *= BigInteger(10);
-        if (len % 2)
-        	len++;
-        div *= 10;
-    }
-    if ((bigIntegerToString(P)).length()%2)
-    {
-        P *= BigInteger(10);
-        if (len % 2)
-        	len++;
-        div *= 10;
-    }
-    BigInteger divider(BigInteger(10).toPow(len/2));
-    BigInteger X_l = P / divider;
-    BigInteger X_r = P % divider;
-    BigInteger Y_l = n / divider;
-    BigInteger Y_r = n % divider;
-    BigInteger r1 = kar_mul(X_l , Y_l);
-    BigInteger r2 = kar_mul(X_r , Y_r);
-    BigInteger ar1(X_l + X_r);
-    BigInteger ar2(Y_l + Y_r);
-    BigInteger r3 = kar_mul(ar1 , ar2);
-    res = r1 * BigInteger(10).toPow(len) + (r3 - r1 - r2) * BigInteger(10).toPow(len / 2) + r2;
-    return (res / BigInteger(div)) * BigInteger(sign) ;
+    a = (BigInteger(4) * curve.a.toPow(3));
+    b = (BigInteger(27) * (curve.b * curve.b));
+    res = (a + b) % curve.m;
+
+    return res != BigInteger(0);
 }
 
 ellipse_curve ellipse_curve_class::get_curve() const
 {
-	return curve;
+    return curve;
 }
