@@ -192,8 +192,8 @@ bool ellipse_curve_class::if_curve_sutable() const
 	BigInteger b;
 	BigInteger res;
 
-	a = kar_mul(BigInteger(4), curve.a.toPow(3));
-	b = kar_mul(BigInteger(27), kar_mul(curve.b, curve.b));
+	a = BigInteger(4) * curve.a.toPow(3);
+	b = BigInteger(27) * (curve.b * curve.b);
 	res = (a + b) % curve.m;
 
 	return res != BigInteger(0);
@@ -213,7 +213,7 @@ bool ellipse_curve_class::if_curve_sutable() const
     вернуть Prod1 * 10 ^ n + (Prod3 - Prod1 - Prod2) * 10 ^ (n / 2) + Prod2
 */
 
-BigInteger ellipse_curve_class::kar_mul(BigInteger P, BigInteger n) const
+/*BigInteger ellipse_curve_class::kar_mul(BigInteger P, BigInteger n) const
 {
     BigInteger res;
 
@@ -222,7 +222,7 @@ BigInteger ellipse_curve_class::kar_mul(BigInteger P, BigInteger n) const
     res = (a + b) % curve.m;
 
     return res != BigInteger(0);
-}
+}*/
 
 ellipse_curve ellipse_curve_class::get_curve() const
 {

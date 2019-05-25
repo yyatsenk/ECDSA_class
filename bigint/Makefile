@@ -29,7 +29,7 @@ $(program) : $(program-objects) $(library-objects)
 	g++ -std=c++11 -g $^ -o $@
 
 clean :
-	rm -f $(library-objects) $(testsuite-cleanfiles) $(program-objects) $(program)
+	rm -f *.o $(program)
 
 all : library $(program)
 
